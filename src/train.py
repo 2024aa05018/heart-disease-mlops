@@ -1,6 +1,7 @@
 import pandas as pd
 import mlflow
 import mlflow.sklearn
+import os
 
 from sklearn.model_selection import cross_validate
 from sklearn.preprocessing import StandardScaler
@@ -11,6 +12,9 @@ from sklearn.ensemble import RandomForestClassifier
 
 from src.config import PROCESSED_DIR
 
+# Ensure MLflow writes locally (CI-safe)
+MLFLOW_TRACKING_DIR = os.path.join(os.getcwd(), "mlruns")
+mlflow.set_tracking_uri(f"file://{MLFLOW_TRACKING_DIR}")
 
 def load_data():
     path = PROCESSED_DIR / "heart.csv"

@@ -38,6 +38,10 @@ jobs:
       - name: Preprocess data
         run: |
           python -m src.preprocess
+      
+      - name: Prepare MLflow directory
+        run: |
+          mkdir -p mlruns
 
       - name: Train model
         run: |
