@@ -31,7 +31,7 @@ jobs:
         run: |
           pytest
 
-            - name: Download data
+      - name: Download data
         run: |
           python -m src.download_data
 
