@@ -31,6 +31,15 @@ jobs:
         run: |
           pytest
 
+            - name: Download data
+        run: |
+          python -m src.download_data
+
+      - name: Preprocess data
+        run: |
+          python -m src.preprocess
+
       - name: Train model
         run: |
           python -m src.train
+
