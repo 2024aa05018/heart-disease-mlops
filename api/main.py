@@ -3,8 +3,18 @@ from pydantic import BaseModel
 import joblib
 import numpy as np
 import pandas as pd
+import time
+import logging
+from fastapi import Request
 
+REQUEST_COUNT = 0
+TOTAL_LATENCY = 0.0
 MODEL_PATH = "models/final_model.joblib"
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 # Load model at startup
 model = joblib.load(MODEL_PATH)
@@ -31,6 +41,33 @@ class PatientInput(BaseModel):
     ca: float
     thal: float
 
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    global REQUEST_COUNT, TOTAL_LATENCY
+
+    start_time = time.time()
+    response = await call_next(request)
+    duration = time.time() - start_time
+
+    REQUEST_COUNT += 1
+    TOTAL_LATENCY += duration
+
+    logging.info(
+        f"{request.method} {request.url.path} "
+        f"status={response.status_code} "
+        f"duration={duration:.3f}s"
+    )
+    return response
+
+@app.get("/metrics")
+def metrics():
+    avg_latency = (
+        TOTAL_LATENCY / REQUEST_COUNT if REQUEST_COUNT > 0 else 0
+    )
+    return {
+        "request_count": REQUEST_COUNT,
+        "average_latency_seconds": round(avg_latency, 4)
+    }
 
 @app.get("/")
 def health_check():
